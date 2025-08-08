@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Ghost's Gauntlet</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: 
+                linear-gradient(180deg, rgba(10, 14, 39, 0.95) 0%, rgba(20, 25, 50, 0.9) 100%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600"><defs><radialGradient id="cave1" cx="0.2" cy="0.8" r="0.6"><stop offset="0%" stop-color="%23654321"/><stop offset="100%" stop-color="%232d1810"/></radialGradient><radialGradient id="cave2" cx="0.8" cy="0.3" r="0.5"><stop offset="0%" stop-color="%238b5a3c"/><stop offset="100%" stop-color="%231a0f08"/></radialGradient></defs><rect width="100%" height="100%" fill="%230a0e27"/><ellipse cx="200" cy="480" rx="150" ry="80" fill="url(%23cave1)"/><ellipse cx="800" cy="180" rx="120" ry="60" fill="url(%23cave2)"/><path d="M0,0 Q200,100 400,50 T800,80 L1000,0 L1000,150 Q800,120 600,140 T200,160 L0,200 Z" fill="%233d2817" opacity="0.6"/><path d="M0,600 Q300,500 600,520 T1000,480 L1000,600 Z" fill="%232d1810"/><circle cx="150" cy="200" r="3" fill="%23ffeb99" opacity="0.4"/><circle cx="850" cy="150" r="2" fill="%23ffeb99" opacity="0.3"/><circle cx="500" cy="100" r="1" fill="%23ffeb99" opacity="0.5"/></svg>') center/cover no-repeat;
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        
+        #game-container {
+            width: 100%;
+            min-height: 100vh;
+            position: relative;
+            background: 
+                linear-gradient(180deg, rgba(10, 14, 39, 0.8) 0%, rgba(30, 27, 75, 0.6) 50%, rgba(45, 24, 16, 0.8) 100%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><filter id="roughPaper"><feTurbulence baseFrequency="0.04" numOctaves="5" result="noise" seed="1"/><feDiffuseLighting in="noise" lighting-color="white" surfaceScale="1"><feDistantLight azimuth="45" elevation="60"/></feDiffuseLighting></filter></defs><rect width="100%" height="100%" fill="%231a1a2e"/><path d="M0,200 Q200,150 400,180 T800,160 Q1000,140 1200,200 L1200,0 L0,0 Z" fill="%23654321" opacity="0.7"/><path d="M0,700 Q300,650 600,680 T1200,660 L1200,800 L0,800 Z" fill="%232d1810"/><ellipse cx="300" cy="400" rx="200" ry="150" fill="%233d2817" opacity="0.4"/><ellipse cx="900" cy="300" rx="150" ry="100" fill="%234a3429" opacity="0.3"/><path d="M100,250 Q200,200 300,240 Q400,280 500,250 Q600,220 700,260 Q800,300 900,270 Q1000,240 1100,280" stroke="%235a3e2b" stroke-width="2" fill="none" opacity="0.5"/><circle cx="200" cy="180" r="2" fill="%23ffeb99" opacity="0.6"/><circle cx="1000" cy="200" r="1.5" fill="%23ffeb99" opacity="0.4"/><circle cx="600" cy="120" r="1" fill="%23ffeb99" opacity="0.7"/><path d="M0,350 C100,330 200,370 300,350 S500,320 600,340 S800,370 900,350 S1100,320 1200,340 L1200,400 C1100,380 1000,420 900,400 S700,370 600,390 S400,420 300,400 S100,370 0,390 Z" fill="%232a1810" opacity="0.6"/></svg>') center/cover no-repeat;
+        }
+        
+        #environment {
+            position: relative;
+            height: 50vh;
+            background: 
+                linear-gradient(180deg, transparent 0%, rgba(45, 24, 16, 0.3) 100%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400"><defs><radialGradient id="caveDepth" cx="0.5" cy="0.8" r="0.7"><stop offset="0%" stop-color="%234a3429"/><stop offset="70%" stop-color="%232d1810"/><stop offset="100%" stop-color="%23000000"/></radialGradient></defs><rect width="100%" height="100%" fill="url(%23caveDepth)"/><path d="M0,300 Q200,250 400,280 T800,260 Q900,270 1000,250 L1000,400 L0,400 Z" fill="%232a1810"/><path d="M0,0 Q100,50 200,40 T400,60 Q600,80 800,50 Q900,30 1000,40 L1000,0 Z" fill="%23654321" opacity="0.6"/><ellipse cx="250" cy="200" rx="80" ry="40" fill="%23000" opacity="0.3"/><ellipse cx="750" cy="180" rx="60" ry="30" fill="%23000" opacity="0.2"/></svg>');
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10%;
+            overflow: hidden;
+        }
+        
+        #player-character {
+            width: 100px;
+            height: 120px;
+            position: relative;
+            animation: breathe 3s ease-in-out infinite;
+        }
+        
+        .thinking #player-character {
+            animation: thinking 2s ease-in-out infinite;
+        }
+        
+        #player-character::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 30% 20%, #8B7355 0%, #6B5B47 50%, #4A3F35 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            box-shadow: inset -10px -10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        #player-character::after {
+            content: '🤔';
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2.5rem;
+            filter: sepia(30%) saturate(150%) hue-rotate(20deg);
+        }
+        
+        .thinking #player-character::after {
+            content: '💭';
+            animation: thoughtBubble 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes thinking {
+            0%, 100% { 
+                transform: scale(1) rotate(-2deg); 
+            }
+            50% { 
+                transform: scale(1.03) rotate(2deg); 
+            }
+        }
+        
+        @keyframes thoughtBubble {
+            0%, 100% { 
+                opacity: 0.6; 
+                transform: translateX(-50%) translateY(0px) scale(1); 
+            }
+            50% { 
+                opacity: 1; 
+                transform: translateX(-50%) translateY(-5px) scale(1.1); 
+            }
+        }
+        
+        #ghost-ai {
+            width: 140px;
+            height: 180px;
+            position: relative;
+            animation: float 4s ease-in-out infinite, ghostGlow 3s ease-in-out infinite alternate;
+        }
+        
+        #ghost-ai::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 70%;
+            background: 
+                radial-gradient(ellipse at center, rgba(240, 248, 255, 0.85) 0%, rgba(200, 220, 240, 0.7) 40%, rgba(180, 200, 230, 0.4) 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            filter: blur(2px);
+            box-shadow: 
+                0 0 30px rgba(240, 248, 255, 0.4),
+                inset 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+        
+        #ghost-ai::after {
+            content: '👻';
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 4rem;
+            filter: 
+                brightness(1.2) 
+                contrast(1.1) 
+                drop-shadow(0 0 10px rgba(240, 248, 255, 0.6));
+            animation: ghostFace 4s ease-in-out infinite;
+        }
+        
+        /* Ghostly trail effect */
+        #ghost-ai .trail {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 40px;
+            background: 
+                radial-gradient(ellipse at center, rgba(240, 248, 255, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: trail 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes trail {
+            0% { 
+                opacity: 0.2; 
+                transform: translateX(-50%) scaleY(0.5); 
+            }
+            100% { 
+                opacity: 0.5; 
+                transform: translateX(-50%) scaleY(1); 
+            }
+        }
+        
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        @keyframes ghostGlow {
+            0% { box-shadow: 0 0 30px rgba(200, 200, 255, 0.3); }
+            100% { box-shadow: 0 0 50px rgba(200, 200, 255, 0.6); }
+        }
+        
+        @keyframes ghostFace {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        
+        #ui-container {
+            padding: 3rem;
+            background: 
+                linear-gradient(180deg, rgba(45, 24, 16, 0.8) 0%, rgba(30, 27, 75, 0.6) 100%),
+                rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(79, 70, 229, 0.2);
+            min-height: 50vh;
+            position: relative;
+        }
+        
+        #ui-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="30" r="1" fill="%23ffeb99" opacity="0.3"/><circle cx="80" cy="70" r="0.5" fill="%23ffeb99" opacity="0.4"/><circle cx="50" cy="90" r="0.8" fill="%23ffeb99" opacity="0.2"/></svg>');
+            pointer-events: none;
+        }
+        
+        #dialogue-box {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(79, 70, 229, 0.3);
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+        
+        #question-text {
+            font-size: 1.5rem;
+            line-height: 1.6;
+            color: #f1f5f9;
+            font-weight: 500;
+        }
+        
+        #answer-area {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            align-items: center;
+        }
+        
+        #player-answer-input {
+            flex: 1;
+            padding: 1.25rem 1.5rem;
+            font-size: 1.2rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid rgba(79, 70, 229, 0.3);
+            border-radius: 12px;
+            color: #f8fafc;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        
+        #player-answer-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+            background: rgba(15, 23, 42, 0.9);
+        }
+        
+        #submit-answer-btn {
+            padding: 1.25rem 2.5rem;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+        
+        #submit-answer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(79, 70, 229, 0.4);
+            background: linear-gradient(135deg, #5b52ea 0%, #8b46f2 100%);
+        }
+        
+        #game-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        #game-stats p {
+            background: rgba(30, 41, 59, 0.6);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(79, 70, 229, 0.2);
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+        
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(180deg, rgba(10, 14, 39, 0.95) 0%, rgba(45, 24, 16, 0.9) 100%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><rect width="100%" height="100%" fill="%23000"/><path d="M0,100 Q200,50 400,80 T800,60 Q1000,40 1200,80 L1200,0 L0,0 Z" fill="%23654321" opacity="0.8"/><path d="M0,700 Q300,650 600,680 T1200,660 L1200,800 L0,800 Z" fill="%232d1810"/><ellipse cx="600" cy="400" rx="300" ry="200" fill="%23000" opacity="0.3"/><circle cx="300" cy="150" r="3" fill="%23ffeb99" opacity="0.8"/><circle cx="900" cy="120" r="2" fill="%23ffeb99" opacity="0.6"/><circle cx="600" cy="100" r="1" fill="%23ffeb99" opacity="0.9"/></svg>') center/cover no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            text-align: center;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+        
+        .intro-content {
+            max-width: 900px;
+            width: 100%;
+        }
+        
+        .neon-title {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 
+                0 0 10px #4f46e5,
+                0 0 20px #4f46e5,
+                0 0 40px #4f46e5,
+                0 0 80px #4f46e5;
+            margin-bottom: 3rem;
+            letter-spacing: 0.1em;
+            line-height: 1.1;
+            animation: neonPulse 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes neonPulse {
+            0% { 
+                text-shadow: 
+                    0 0 10px #4f46e5,
+                    0 0 20px #4f46e5,
+                    0 0 40px #4f46e5,
+                    0 0 80px #4f46e5;
+            }
+            100% { 
+                text-shadow: 
+                    0 0 15px #6366f1,
+                    0 0 30px #6366f1,
+                    0 0 60px #6366f1,
+                    0 0 100px #6366f1;
+            }
+        }
+        
+        .intro-text {
+            margin-bottom: 3rem;
+            line-height: 1.8;
+        }
+        
+        .intro-welcome {
+            font-size: 1.25rem;
+            color: #e2e8f0;
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+        
+        .intro-rules {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+        
+        .intro-final {
+            font-size: 1.2rem;
+            color: #f1f5f9;
+            font-weight: 500;
+        }
+        
+        .modern-btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 1rem 3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 4px 15px rgba(79, 70, 229, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            font-family: inherit;
+            letter-spacing: 0.025em;
+        }
+        
+        .modern-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 30px rgba(79, 70, 229, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, #5b52ea 0%, #8b46f2 100%);
+        }
+        
+        .modern-btn:active {
+            transform: translateY(0);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        #game-over-screen h2, #win-screen h2 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            font-weight: 700;
+        }
+        
+        #game-over-screen h2 {
+            color: #ef4444;
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+        
+        #win-screen h2 {
+            color: #22c55e;
+            text-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+        }
+        
+        #game-over-screen p, #win-screen p {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .restart-btn {
+            margin-top: 2rem;
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+        
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(79, 70, 229, 0.4);
+            background: linear-gradient(135deg, #5b52ea 0%, #8b46f2 100%);
+        }
+        
+        .feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: 700;
+            padding: 1.5rem 3rem;
+            border-radius: 16px;
+            z-index: 100;
+            animation: feedbackPop 2s ease-out forwards;
+            backdrop-filter: blur(10px);
+        }
+        
+        .correct {
+            background: rgba(34, 197, 94, 0.9);
+            color: white;
+            box-shadow: 0 8px 32px rgba(34, 197, 94, 0.4);
+            border: 1px solid rgba(34, 197, 94, 0.6);
+        }
+        
+        .incorrect {
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            box-shadow: 0 8px 32px rgba(239, 68, 68, 0.4);
+            border: 1px solid rgba(239, 68, 68, 0.6);
+        }
+        
+        @keyframes feedbackPop {
+            0% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0.5); 
+            }
+            20% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1.05); 
+            }
+            80% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(1); 
+            }
+        }
+        
+        .lives-indicator {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Intro Screen -->
+        <div id="intro-screen" class="screen">
+            <div class="intro-content">
+                <h1 class="neon-title">THE GHOST'S GAUNTLET</h1>
+                
+                <div class="intro-text">
+                    <p class="intro-welcome">Welcome, mortal. This cave is my domain, and you are my newest guest. The entrance has sealed, and your only way out is to complete my <strong>"100-level gauntlet of questions"</strong>.</p>
+                    
+                    <p class="intro-rules">You have <strong>3 lives</strong>. An incorrect answer will cost you one and send you back to the previous level to face a new question. Lose all three, and you will be trapped here forever.</p>
+                    
+                    <p class="intro-final">Your journey begins now.</p>
+                </div>
+                
+                <button id="start-game-btn" class="modern-btn">Begin Your Trial</button>
+            </div>
+        </div>
+        
+        <!-- Main Game Area -->
+        <div id="environment" class="thinking">
+            <div id="player-character"></div>
+            <div id="ghost-ai">
+                <div class="trail"></div>
+            </div>
+        </div>
+        
+        <div id="ui-container">
+            <div id="dialogue-box">
+                <p id="question-text">The Ghost's question will appear here...</p>
+            </div>
+            <div id="answer-area">
+                <input type="text" id="player-answer-input" placeholder="Type your answer here...">
+                <button id="submit-answer-btn">Submit Answer</button>
+            </div>
+            <div id="game-stats">
+                <p>Level: <span id="current-level">1</span>/20</p>
+                <p class="lives-indicator">Lives: <span id="player-lives">3</span></p>
+            </div>
+        </div>
+        
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen hidden">
+            <h2>Game Over</h2>
+            <p>The ghost's laughter echoes through the cave...</p>
+            <p><em>"Your knowledge was insufficient, mortal. You shall remain in my domain for eternity."</em></p>
+            <button class="restart-btn" onclick="restartGame()">Try Again</button>
+        </div>
+        
+        <!-- Win Screen -->
+        <div id="win-screen" class="screen hidden">
+            <h2>Victory!</h2>
+            <p>The ghost bows respectfully...</p>
+            <p><em>"Impressive, mortal. Your wisdom has earned you freedom. The exit awaits you."</em></p>
+            <p>You have conquered the Ghost's Gauntlet!</p>
+            <button class="restart-btn" onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state variables
+        let currentLevel = 1;
+        let playerLives = 3;
+        let activeQuestion = {};
+        let usedQuestions = new Set();
+        let questionsAnsweredInLevel = 0;
+        let questionsPerLevel = 5;
+        
+        // Comprehensive question bank organized by difficulty with diverse topics
+        const questionBank = [
+            // Levels 1-5: Very Easy (General Knowledge, Basic Math, Simple Facts)
+            { level: 1, question: "What color is the sky on a clear day?", answer: "blue", category: "General" },
+            { level: 1, question: "What is 2 + 2?", answer: "4", category: "Math" },
+            { level: 1, question: "How many legs does a cat have?", answer: "4", category: "Animals" },
+            { level: 1, question: "What do cows give us to drink?", answer: "milk", category: "General" },
+            { level: 1, question: "What is the opposite of hot?", answer: "cold", category: "General" },
+            { level: 1, question: "What do bees make?", answer: "honey", category: "Animals" },
+            { level: 1, question: "What is 10 - 5?", answer: "5", category: "Math" },
+            { level: 1, question: "What sound does a cow make?", answer: "moo", category: "Animals" },
+            { level: 1, question: "What is the first letter of the alphabet?", answer: "a", category: "General" },
+            { level: 1, question: "How many days are in a week?", answer: "7", category: "General" },
+            
+            { level: 2, question: "What is the capital of the United States?", answer: "washington dc", category: "Geography" },
+            { level: 2, question: "What is 3 x 4?", answer: "12", category: "Math" },
+            { level: 2, question: "What animal is known as man's best friend?", answer: "dog", category: "Animals" },
+            { level: 2, question: "How many months are in a year?", answer: "12", category: "General" },
+            { level: 2, question: "What color do you get when you mix red and yellow?", answer: "orange", category: "General" },
+            { level: 2, question: "What is 20 / 4?", answer: "5", category: "Math" },
+            { level: 2, question: "Which meal do we eat in the morning?", answer: "breakfast", category: "General" },
+            { level: 2, question: "What do we use to write on paper?", answer: "pen", category: "General" },
+            { level: 2, question: "How many wheels does a bicycle have?", answer: "2", category: "General" },
+            { level: 2, question: "What season comes after winter?", answer: "spring", category: "General" },
+
+            // Levels 6-10: Easy
+            { level: 6, question: "What is the capital of France?", answer: "paris", category: "Geography" },
+            { level: 6, question: "What planet is closest to the Sun?", answer: "mercury", category: "Science" },
+            { level: 6, question: "What is 7 x 8?", answer: "56", category: "Math" },
+            { level: 6, question: "Who wrote Romeo and Juliet?", answer: "shakespeare", category: "Literature" },
+            { level: 6, question: "What is the largest ocean on Earth?", answer: "pacific", category: "Geography" },
+            { level: 6, question: "How many continents are there?", answer: "7", category: "Geography" },
+            { level: 6, question: "What gas do plants absorb from the atmosphere?", answer: "carbon dioxide", category: "Science" },
+            { level: 6, question: "What is 15 + 27?", answer: "42", category: "Math" },
+            { level: 6, question: "Which Disney character has very long hair?", answer: "rapunzel", category: "Entertainment" },
+            { level: 6, question: "What instrument has 88 keys?", answer: "piano", category: "Music" },
+
+            // Levels 11-15: Medium-Easy
+            { level: 11, question: "What is the square root of 64?", answer: "8", category: "Math" },
+            { level: 11, question: "Which element has the chemical symbol 'O'?", answer: "oxygen", category: "Science" },
+            { level: 11, question: "In what year did World War II end?", answer: "1945", category: "History" },
+            { level: 11, question: "What is the capital of Japan?", answer: "tokyo", category: "Geography" },
+            { level: 11, question: "Who painted the Mona Lisa?", answer: "da vinci", category: "Art" },
+            { level: 11, question: "What is 144 / 12?", answer: "12", category: "Math" },
+            { level: 11, question: "Which planet is known as the Red Planet?", answer: "mars", category: "Science" },
+            { level: 11, question: "What currency is used in the United Kingdom?", answer: "pound", category: "General" },
+            { level: 11, question: "How many strings does a guitar typically have?", answer: "6", category: "Music" },
+            { level: 11, question: "What is the largest mammal in the world?", answer: "blue whale", category: "Animals" },
+
+            // Levels 16-20: Medium
+            { level: 16, question: "What is the atomic number of carbon?", answer: "6", category: "Science" },
+            { level: 16, question: "Which composer wrote 'The Four Seasons'?", answer: "vivaldi", category: "Music" },
+            { level: 16, question: "What is the capital of Australia?", answer: "canberra", category: "Geography" },
+            { level: 16, question: "In what year was the first iPhone released?", answer: "2007", category: "Technology" },
+            { level: 16, question: "What is the smallest prime number?", answer: "2", category: "Math" },
+            { level: 16, question: "Which Shakespeare play features the character Hamlet?", answer: "hamlet", category: "Literature" },
+            { level: 16, question: "What is 17 x 13?", answer: "221", category: "Math" },
+            { level: 16, question: "Which vitamin is produced when skin is exposed to sunlight?", answer: "vitamin d", category: "Science" },
+            { level: 16, question: "What is the hardest natural substance on Earth?", answer: "diamond", category: "Science" },
+            { level: 16, question: "Who was the first person to walk on the moon?", answer: "neil armstrong", category: "History" },
+
+            // Add more levels with increasing difficulty
+            { level: 17, question: "What is the speed of light in vacuum (in km/s)?", answer: "299792458", category: "Science" },
+            { level: 18, question: "Which element has the highest atomic number that occurs naturally?", answer: "uranium", category: "Science" },
+            { level: 19, question: "What is the capital of Mongolia?", answer: "ulaanbaatar", category: "Geography" },
+            { level: 20, question: "Who developed the theory of evolution by natural selection?", answer: "darwin", category: "Science" }
+        ];
+        
+        // Add more questions for each level range with diverse topics
+        function generateAdditionalQuestions() {
+            const categories = ["Geography", "History", "Science", "Literature", "Music", "Art", "Sports", "Movies", "Animals", "Food"];
+            const easyQuestions = [
+                { q: "What is the capital of Italy?", a: "rome", cat: "Geography" },
+                { q: "Which animal is the king of the jungle?", a: "lion", cat: "Animals" },
+                { q: "What sport is played at Wimbledon?", a: "tennis", cat: "Sports" },
+                { q: "What do you call a baby dog?", a: "puppy", cat: "Animals" },
+                { q: "Which planet is known for its rings?", a: "saturn", cat: "Science" },
+                { q: "What is the largest country in the world?", a: "russia", cat: "Geography" },
+                { q: "Who composed 'Fur Elise'?", a: "beethoven", cat: "Music" },
+                { q: "What is the main ingredient in bread?", a: "flour", cat: "Food" },
+                { q: "Which ocean is the smallest?", a: "arctic", cat: "Geography" },
+                { q: "What gas makes up most of Earth's atmosphere?", a: "nitrogen", cat: "Science" }
+            ];
+
+            // Add questions to levels 1-10 with mixed topics
+            for (let level = 1; level <= 10; level++) {
+                easyQuestions.forEach((eq, index) => {
+                    if (index % 2 === 0) { // Add every other question to avoid too many
+                        questionBank.push({ 
+                            level: level, 
+                            question: eq.q, 
+                            answer: eq.a, 
+                            category: eq.cat 
+                        });
+                    }
+                });
+                
+                // Add some math questions too
+                questionBank.push({ 
+                    level: level, 
+                    question: `What is ${level + 10} - ${level}?`, 
+                    answer: "10", 
+                    category: "Math" 
+                });
+                questionBank.push({ 
+                    level: level, 
+                    question: `What is ${level} multiplied by 5?`, 
+                    answer: (level * 5).toString(), 
+                    category: "Math" 
+                });
+            }
+        }
+        
+        generateAdditionalQuestions();
+        
+        // DOM elements
+        const questionText = document.getElementById('question-text');
+        const answerInput = document.getElementById('player-answer-input');
+        const submitBtn = document.getElementById('submit-answer-btn');
+        const currentLevelDisplay = document.getElementById('current-level');
+        const playerLivesDisplay = document.getElementById('player-lives');
+        const introScreen = document.getElementById('intro-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const winScreen = document.getElementById('win-screen');
+        const startBtn = document.getElementById('start-game-btn');
+        
+        // Get a new question for the current level
+        function getNewQuestion(level) {
+            const levelQuestions = questionBank.filter(q => q.level === level);
+            
+            if (levelQuestions.length === 0) {
+                // Fallback to questions from nearby levels
+                const nearbyQuestions = questionBank.filter(q => 
+                    Math.abs(q.level - level) <= 2
+                );
+                if (nearbyQuestions.length > 0) {
+                    return nearbyQuestions[Math.floor(Math.random() * nearbyQuestions.length)];
+                }
+                // Ultimate fallback
+                return { 
+                    level: level, 
+                    question: `What is ${level} plus ${level}?`, 
+                    answer: (level * 2).toString(),
+                    category: "Math"
+                };
+            }
+            
+            // Filter out recently used questions for this level
+            const availableQuestions = levelQuestions.filter(q => 
+                !usedQuestions.has(`${q.question}-${level}`)
+            );
+            
+            if (availableQuestions.length === 0) {
+                // Reset used questions for this level if all have been used
+                levelQuestions.forEach(q => {
+                    usedQuestions.delete(`${q.question}-${level}`);
+                });
+                return levelQuestions[Math.floor(Math.random() * levelQuestions.length)];
+            }
+            
+            const selectedQuestion = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+            usedQuestions.add(`${selectedQuestion.question}-${level}`);
+            
+            return selectedQuestion;
+        }
+        
+        // Display the current question
+        function displayQuestion() {
+            activeQuestion = getNewQuestion(currentLevel);
+            const progressText = `Level ${currentLevel} - Question ${questionsAnsweredInLevel + 1}/5`;
+            const categoryBadge = activeQuestion.category ? ` [${activeQuestion.category}]` : '';
+            questionText.textContent = `${progressText}${categoryBadge}: ${activeQuestion.question}`;
+            answerInput.value = '';
+            answerInput.focus();
+        }
+        
+        // Show feedback animation
+        function showFeedback(isCorrect) {
+            const feedback = document.createElement('div');
+            feedback.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+            feedback.textContent = isCorrect ? 'Correct!' : 'Incorrect!';
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                document.body.removeChild(feedback);
+            }, 2000);
+        }
+        
+        // Check the player's answer
+        function normalizeAnswer(str) {
+            return str
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, ''); // remove all non-alphanumeric
+        }
+
+        function checkAnswer() {
+            const playerAnswer = normalizeAnswer(answerInput.value.trim());
+            const correctAnswer = normalizeAnswer(activeQuestion.answer);
+
+            if (playerAnswer === correctAnswer) {
+                // Correct answer
+                showFeedback(true);
+                questionsAnsweredInLevel++;
+
+                // Check if player completed all 5 questions in this level
+                if (questionsAnsweredInLevel >= questionsPerLevel) {
+                    currentLevel++;
+                    questionsAnsweredInLevel = 0;
+
+                    if (currentLevel > 20) { // Win condition - completed 20 levels (100 questions total)
+                        setTimeout(() => {
+                            winScreen.classList.remove('hidden');
+                        }, 1000);
+                        return;
+                    }
+                }
+
+                setTimeout(() => {
+                    displayQuestion();
+                    updateUI();
+                }, 1500);
+            } else {
+                // Incorrect answer
+                showFeedback(false);
+                playerLives--;
+
+                if (playerLives <= 0) {
+                    // Game over
+                    setTimeout(() => {
+                        gameOverScreen.classList.remove('hidden');
+                    }, 1000);
+                    return;
+                }
+
+                // Go back to the previous level but reset question count for that level
+                if (currentLevel > 1) {
+                    currentLevel--;
+                }
+                questionsAnsweredInLevel = 0; // Reset questions for the level they return to
+
+                setTimeout(() => {
+                    displayQuestion();
+                    updateUI();
+                }, 1500);
+            }
+        }
+        
+        // Update the UI displays
+        function updateUI() {
+            currentLevelDisplay.textContent = currentLevel;
+            playerLivesDisplay.textContent = playerLives;
+        }
+        
+        // Start the game
+        function startGame() {
+            introScreen.classList.add('hidden');
+            // Add thinking mode to environment
+            const environment = document.getElementById('environment');
+            environment.classList.add('thinking');
+            displayQuestion();
+            updateUI();
+        }
+        
+        // Restart the game
+        function restartGame() {
+            currentLevel = 1;
+            playerLives = 3;
+            questionsAnsweredInLevel = 0;
+            usedQuestions.clear();
+            gameOverScreen.classList.add('hidden');
+            winScreen.classList.add('hidden');
+            displayQuestion();
+            updateUI();
+        }
+        
+        // Event listeners
+        startBtn.addEventListener('click', startGame);
+        submitBtn.addEventListener('click', checkAnswer);
+        answerInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+        
+        // Initialize the game
+        updateUI();
+    </script>
+</body>
+</html>
